@@ -1,133 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Tester</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProCode - Interactive Playground</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --panel-bg: #161b22;
+            --accent: #238636;
+            --accent-hover: #2ea043;
+            --border: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+        }
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: monospace;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-    body {
-        background: #0f0f0f;
-        color: white;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    header {
-        background: #1a1a1a;
-        padding: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #222;
-    }
+        /* --- Header --- */
+        header {
+            background: var(--panel-bg);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
 
-    header h1 {
-        font-size: 16px;
-        color: #00ff88;
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: white;
+        }
 
-    .buttons {
-        display: flex;
-        gap: 10px;
-    }
+        .logo i { color: var(--accent); }
 
-    button {
-        padding: 8px 14px;
-        background: #00ff88;
-        border: none;
-        cursor: pointer;
-        font-weight: bold;
-        border-radius: 6px;
-        transition: 0.2s;
-    }
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
 
-    button:hover {
-        background: #00cc6e;
-    }
+        button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
 
-    .container {
-        flex: 1;
-        display: flex;
-    }
+        button:hover { background: var(--accent-hover); }
+        button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        button.secondary:hover { background: var(--border); }
 
-    textarea {
-        width: 50%;
-        background: #111;
-        color: #00ff88;
-        border: none;
-        padding: 15px;
-        resize: none;
-        outline: none;
-        font-size: 14px;
-    }
+        /* --- Layout --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 90px);
+        }
 
-    iframe {
-        width: 50%;
-        border: none;
-        background: white;
-    }
+        .editor-section {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--border);
+        }
 
-    footer {
-        text-align: center;
-        padding: 8px;
-        background: #1a1a1a;
-        font-size: 12px;
-        color: #666;
-    }
-</style>
+        /* Tabs */
+        .tabs {
+            background: var(--panel-bg);
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            background: rgba(35, 134, 54, 0.05);
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+        }
+
+        textarea {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            color: #e6edf3;
+            border: none;
+            padding: 20px;
+            resize: none;
+            outline: none;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        textarea.active { display: block; }
+
+        /* --- Preview Section --- */
+        .preview-section {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .preview-toolbar {
+            background: var(--panel-bg);
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preview-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+
+        footer {
+            height: 30px;
+            background: var(--panel-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 <body>
 
 <header>
-    <h1>Simple HTML Tester</h1>
-    <div class="buttons">
-        <button onclick="runCode()">Run</button>
-        <button onclick="clearCode()">Clear</button>
+    <div class="logo">
+        <i data-lucide="code-2"></i>
+        <span>PROCODE</span>
+    </div>
+    <div class="actions">
+        <button class="secondary" onclick="clearAll()"><i data-lucide="trash-2"></i> Clear</button>
+        <button class="secondary" onclick="downloadCode()"><i data-lucide="download"></i> Export</button>
+        <button onclick="runCode()"><i data-lucide="play"></i> Run Code</button>
     </div>
 </header>
 
-<div class="container">
-    <textarea id="code" placeholder="Write your HTML here...">
-<h1>Hello World</h1>
-<p>This is your live HTML preview!</p>
-<button onclick="alert('It works!')">Click Me</button>
-    </textarea>
+<div class="main-container">
+    <div class="editor-section">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('html')">HTML</div>
+            <div class="tab" onclick="switchTab('css')">CSS</div>
+            <div class="tab" onclick="switchTab('js')">JavaScript</div>
+        </div>
+        <div class="editor-container">
+            <textarea id="html-edit" class="active" spellcheck="false" placeholder="">
+<div class="card">
+  <h1>ProCode Editor</h1>
+  <p>Edit HTML, CSS, and JS in real-time.</p>
+  <button id="btn">Click Me</button>
+</div>
+            </textarea>
+            <textarea id="css-edit" spellcheck="false" placeholder="/* CSS here */">
+body { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  height: 100vh; 
+  background: #f0f2f5; 
+}
+.card { 
+  background: white; 
+  padding: 2rem; 
+  border-radius: 12px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+  text-align: center;
+}
+button {
+  margin-top: 10px;
+  padding: 8px 20px;
+  background: #238636;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+            </textarea>
+            <textarea id="js-edit" spellcheck="false" placeholder="// JS here">
+const btn = document.getElementById('btn');
+btn.addEventListener('click', () => {
+  alert('Logic and Style combined!');
+});
+            </textarea>
+        </div>
+    </div>
 
-    <iframe id="preview"></iframe>
+    <div class="preview-section">
+        <div class="preview-toolbar">
+            <span class="preview-label">Live Preview</span>
+            <div class="actions">
+                <i data-lucide="monitor" size="14" style="color: var(--text-muted)"></i>
+            </div>
+        </div>
+        <iframe id="preview"></iframe>
+    </div>
 </div>
 
 <footer>
-    Live HTML Previewer
+    Status: Auto-sync active • UTF-8
 </footer>
 
 <script>
-    const codeArea = document.getElementById("code");
+    // Initialize Icons
+    lucide.createIcons();
+
+    const htmlEditor = document.getElementById("html-edit");
+    const cssEditor = document.getElementById("css-edit");
+    const jsEditor = document.getElementById("js-edit");
     const preview = document.getElementById("preview");
 
     function runCode() {
-        preview.srcdoc = codeArea.value;
+        const fullCode = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <style>${cssEditor.value}<\/style>
+                </head>
+                <body>
+                    ${htmlEditor.value}
+                    <script>${jsEditor.value}<\/script>
+                </body>
+            </html>
+        `;
+        preview.srcdoc = fullCode;
     }
 
-    function clearCode() {
-        codeArea.value = "";
-        preview.srcdoc = "";
+    function switchTab(lang) {
+        // Update tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // Update textareas
+        document.querySelectorAll('textarea').forEach(tx => tx.classList.remove('active'));
+        document.getElementById(`${lang}-edit`).classList.add('active');
     }
 
-    // Auto update while typing
-    codeArea.addEventListener("input", () => {
-        preview.srcdoc = codeArea.value;
+    function clearAll() {
+        if(confirm("Are you sure you want to clear all code?")) {
+            htmlEditor.value = "";
+            cssEditor.value = "";
+            jsEditor.value = "";
+            runCode();
+        }
+    }
+
+    function downloadCode() {
+        const blob = new Blob([preview.srcdoc], {type: 'text/html'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'index.html';
+        a.click();
+    }
+
+    // Auto-update with a small debounce to save performance
+    [htmlEditor, cssEditor, jsEditor].forEach(el => {
+        el.addEventListener("input", runCode);
     });
 
-    // Load default code on start
+    // Initial Load
     window.onload = runCode;
 </script>
 
